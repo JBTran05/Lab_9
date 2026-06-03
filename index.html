@@ -24,7 +24,7 @@
     output {
       border: 1px solid gray;
       display: block;
-      height: 18px;
+      min-height: 18px;
       margin-top: 5px;
       padding: 5px;
       width: 240px;
@@ -88,20 +88,223 @@
   </main>
 
   <script>
-    let form = document.querySelector('form');
-    form.addEventListener('submit', e => {
+
+    // Step 4: Custom Error type for calculator problems
+    class CalculatorError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'CalculatorError';
+      }
+    }
+
+    // step 3
+    // Get the Calculate button from the page.
+    const calculateBtn = document.querySelector('#calculate');
+
+    // Get both number input boxes from the calculator.
+    const numberInputs = document.querySelectorAll('input');
+
+    // Get the operator dropdown menu.
+    const operatorSelect = document.querySelector('select');
+
+    // Get the textarea where the result or error message will be displayed.
+    const resultBox = document.querySelector('output');
+
+    calculateBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      try {
+        // Groups the calculator messages together in the console.
+        console.group('Try/Catch/Finally Calculator Demo');
+
+        // Convert the two input values from strings into numbers.
+        const firstNumber = Number(numberInputs[0].value);
+        const secondNumber = Number(numberInputs[1].value);
+
+        // Get the selected math operator.
+        const operator = operatorSelect.value;
+
+        // Log the values so we can see what the program is working with.
+        console.log('First number:', firstNumber);
+        console.log('Second number:', secondNumber);
+        console.log('Operator:', operator);
+
+        // If either input is not a real number, throw an error.
+        // This sends the program directly to the catch block.
+        if (Number.isNaN(firstNumber) || Number.isNaN(secondNumber)) {
+          throw new CalculatorError('Must be valid integers.');
+        }
+
+        // This variable will store the final calculator result.
+        let result;
+
+        // Choose the correct calculation based on the selected operator.
+        if (operator === '+') {
+          result = firstNumber + secondNumber;
+        } else if (operator === '-') {
+          result = firstNumber - secondNumber;
+        } else if (operator === '*') {
+          result = firstNumber * secondNumber;
+        } else if (operator === '/') {
+          // Division by zero is not useful for this calculator,
+          // so we throw an error instead of showing Infinity.
+          if (secondNumber === 0) {
+            throw new CalculatorError('Cannot divide by zero.');
+          }
+
+          result = firstNumber / secondNumber;
+        } else {
+          // This catches unexpected operator values.
+          throw new CalculatorError('Invalid operator selected.');
+        }
+
+        // If no error happened, show the result on the page.
+        resultBox.textContent = result;
+
+        // Also log the successful result to the console.
+        console.log('Calculation worked. Result:', result);
+      } catch (error) {
+        // The catch block runs if something in the try block throws an error.
+        // Check whether this is our custom calculator error.
+        if (error instanceof CalculatorError) {
+          resultBox.textContent = error.name + ': ' + error.message;
+          console.error('Custom CalculatorError caught:', error.message);
+        } else {
+          resultBox.textContent = 'Unexpected Error: ' + error.message;
+          console.error('Unexpected error caught:', error);
+        }
+      } finally {
+        // The finally block always runs, whether the calculation worked or failed.
+        console.log('Finally block ran. Calculator attempt finished.');
+
+        // Ends the grouped console output.
+        console.groupEnd();
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
+    // Step 5: Global error handler
+    window.onerror = function (message, source, line, column, error) {
+      console.error('Global error caught by window.onerror');
+      console.error('Message:', message);
+      console.error('Source:', source);
+      console.error('Line:', line);
+      console.error('Column:', column);
+      console.error('Error object:', error);
+    };
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    // Step 2
+    // Button 0: Console Log
+    errorBtns[0].addEventListener('click', () => {
+      console.log('Console Log Demo: The user clicked the Console Log button.');
+    });
+
+    // Button 1: Console Error
+    errorBtns[1].addEventListener('click', () => {
+      console.error('Console Error Demo: This is an example error message.');
+    });
+
+    // Button 2: Console Count
+    errorBtns[2].addEventListener('click', () => {
+      console.count('Console Count Demo');
+    });
+
+    // Button 3: Console Warn
+    errorBtns[3].addEventListener('click', () => {
+      console.warn('Console Warn Demo: This is a warning message.');
+    });
+
+    // Button 4: Console Assert
+    errorBtns[4].addEventListener('click', () => {
+      const userIsLoggedIn = false;
+      console.assert(userIsLoggedIn, 'Console Assert Demo: userIsLoggedIn is false.');
+    });
+
+    // Button 5: Console Clear
+    errorBtns[5].addEventListener('click', () => {
+      console.clear();
+      console.log('Console was cleared.');
+    });
+
+    // Button 6: Console Dir
+    errorBtns[6].addEventListener('click', () => {
+      const calculatorInfo = {
+        appName: 'Error Calculator',
+        lab: 'Lab 9',
+        topic: 'JavaScript Error Handling',
+        buttonsWorking: true
+      };
+
+      console.dir(calculatorInfo);
+    });
+
+    // Button 7: Console dirxml
+    errorBtns[7].addEventListener('click', () => {
+      const mainElement = document.querySelector('main');
+      console.dirxml(mainElement);
+    });
+
+    // Button 8: Console Group Start
+    errorBtns[8].addEventListener('click', () => {
+      console.group('Console Group Demo');
+      console.log('This message is inside the group.');
+      console.log('Click Console Group End to close this group.');
+    });
+
+    // Button 9: Console Group End
+    errorBtns[9].addEventListener('click', () => {
+      console.log('The console group is ending now.');
+      console.groupEnd();
+    });
+
+    // Button 10: Console Table
+    errorBtns[10].addEventListener('click', () => {
+      const sampleErrors = [
+        { type: 'Input Error', message: 'User entered invalid data', handled: true },
+        { type: 'DOM Error', message: 'Element was not found', handled: true },
+        { type: 'Global Error', message: 'Unexpected error outside try/catch', handled: false }
+      ];
+
+      console.table(sampleErrors);
+    });
+
+    // Button 11: Start Timer
+    errorBtns[11].addEventListener('click', () => {
+      console.time('Timer Demo');
+      console.log('Timer started. Click End Timer to stop it.');
+    });
+
+    // Button 12: End Timer
+    errorBtns[12].addEventListener('click', () => {
+      console.timeEnd('Timer Demo');
+    });
+
+    // Button 13: Console Trace
+    errorBtns[13].addEventListener('click', () => {
+      startTraceDemo();
+    });
+    
+    // Button 14: Trigger a Global Error
+    errorBtns[14].addEventListener('click', () => {
+      const missingElement = null;
+
+    // This causes a real global TypeError because missingElement is null.
+    // It is not inside a try/catch block, so window.onerror catches it.
+      missingElement.textContent = 'This will cause a global error.';
+    });
+
+    function startTraceDemo() {
+      middleTraceDemo();
+    }
+
+    function middleTraceDemo() {
+      endTraceDemo();
+    }
+
+    function endTraceDemo() {
+      console.trace('Console Trace Demo: This shows the call stack.');
+    }
+
   </script>
 </body>
 
